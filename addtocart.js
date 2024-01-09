@@ -25,64 +25,60 @@ const product = [
   }
 ];
 
-const categories = [...new Set(product.map((item) => {
-  return item;
-}))];
+const categories = [...new Set(product.map(item => item.title))];
 
-let i = 0;
-document.getElementById('root').innerHTML = categories.map((item) => {
-  var { image, title, price } = item;
-  return (
-    `
-      <div class='box'>
-        <div class='img-box'>
-          <img class='images' src=${image}>
-        </div>
-        <div class='bottom'>
-          <p>${title}</p>
-          <h2>${price}.00</h2>
-          <button onclick='addToCart(${i++})'>Add to cart</button>
-        </div>
-      </div>`
-  );
-}).join('')
+document.getElementById('root').innerHTML = categories.map((title, index) => {
+  const { image, price } = product.find(item => item.title === title);
+  return `
+    <div class='box'>
+      <div class='img-box'>
+        <img class='images' src='${image}' alt='${title}'>
+      </div>
+      <div class='bottom'>
+        <p>${title}</p>
+        <h2>${price}.00</h2>
+        <button onclick='addToCart(${index})'>Add to cart</button>
+      </div>
+    </div>`;
+}).join('');
 
-var cart =[];
-function addToCart(a){
-  cart.push({...categories[a]});
+const cart = [];
+
+function addToCart(categoryIndex) {
+  const productIndex = product.findIndex(item => item.title === categories[categoryIndex]);
+  if (productIndex !== -1) {
+    cart.push({ ...product[productIndex] });
+    displayCart();
+  }
+}
+
+function delElement(cartIndex) {
+  cart.splice(cartIndex, 1);
   displayCart();
 }
 
-function delElement(a){
-  cart.splice(a, 1);
-  displayCart();
-}
+function displayCart() {
+  let total = 0;
+  document.getElementById('count').innerHTML = cart.length;
 
-function displayCart(a){
-  let j = 0, total = 0;
-  document.getElementById('count').innerHTML = cart.length; 
-  if(cart.length == 0){
+  if (cart.length === 0) {
     document.getElementById('cartItem').innerHTML = 'Your cart is empty';
-    document.getElementById('total').innerHTML = `${0}.00`;
-  } else{
-    document.getElementById('cartItem').innerHTML = cart.map((items) => {
-      var {image, title, price} = items;
+    document.getElementById('total').innerHTML = '0.00';
+  } else {
+    document.getElementById('cartItem').innerHTML = cart.map((item, index) => {
+      const { image, title, price } = item;
       total += price;
-      document.getElementById('total').innerHTML = `${total}.00`
-      return (
-        `
-          <div class='cart-item'>
-            <div class='row-img'>
-              <img class='rowing' src=${image}>
-            </div>
+      document.getElementById('total').innerHTML = `${total}.00`;
 
-              <p style='font-size: 12px;'>${title}</p>
-              <h2 style='font-size: 15px;'>${price}.00</h2>
-              <i class='fa-solid fa-trash' onclick=delElement(${j++})></i>
-
-          </div>`
-      );
-        
+      return `
+        <div class='cart-item'>
+          <div class='row-img'>
+            <img class='rowing' src='${image}' alt='${title}'>
+          </div>
+          <p style='font-size: 12px;'>${title}</p>
+          <h2 style='font-size: 15px;'>${price}.00</h2>
+          <i class='fa-solid fa-trash' onclick='delElement(${index})'></i>
+        </div>`;
     }).join('');
   }
 }
